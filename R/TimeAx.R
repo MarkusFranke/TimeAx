@@ -27,7 +27,6 @@ dataCreation = function(trainData, sampleNames, constantValue = 0.5){
       if(max(x) == 0){
         rep(0, length(x))
       } else if (min(x) == max(x)) {
-        hasConstantValueTraj <<- TRUE
         rep(constantValue, length(x))
       } else {
         (x - minVal) / (maxVal - minVal)
