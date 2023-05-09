@@ -12,24 +12,31 @@ calculateRatios = function(currData){
 
 ########## Building patient data
 #' @keywords internal
-dataCreation = function(trainData, sampleNames){
-  lapply(unique(sampleNames), function(currSample){
-    selectedIndexes = which(sampleNames == currSample)
-    selectedTrajectoryBase = 1:length(selectedIndexes)
-    trajectory= selectedTrajectoryBase/max(selectedTrajectoryBase)
-    currData = trainData[,selectedIndexes]
-    baseData = currData
-    currDataNorm = t(apply(currData, 1, function(x){
-      minVal = min(x)
-      maxVal = max(x)
-      if(max(x)==0){
-        return(rep(0,length(x)))
-      }else{
-        (x - minVal)/(maxVal - minVal)
+dataCreation = function(trainData, sampleNames, constantValue = 0.5){
+  hasConstantValueTraj <- FALSE
+  
+  samples <- lapply(unique(sampleNames), function(currSample){
+    selectedIndexes <- which(sampleNames == currSample)
+    selectedTrajectoryBase <- 1:length(selectedIndexes)
+    trajectory <- selectedTrajectoryBase / max(selectedTrajectoryBase)
+    currData <- trainData[, selectedIndexes]
+    baseData <- currData
+    currDataNorm <- t(apply(currData, 1, function(x){
+      minVal <- min(x)
+      maxVal <- max(x)
+      if(max(x) == 0){
+        rep(0, length(x))
+      } else if (min(x) == max(x)) {
+        hasConstantValueTraj <<- TRUE
+        rep(constantValue, length(x))
+      } else {
+        (x - minVal) / (maxVal - minVal)
       }
     }))
     list(scaledData = currDataNorm, traj = trajectory, baseData = baseData, name = currSample, type = "Sample")
   })
+  
+  return(samples)
 }
 
 ########## Calculation of consensus trajectory
@@ -225,14 +232,14 @@ modelCreation = function(trainData, sampleNames, ratio = T, numOfIter = 100, num
   #   message('Some features do not vary across patients time points!')
   #   return(NULL)
   # }
-  if(max(apply(do.call(rbind,lapply(listOfSamples, function(X){
-    apply(X$scaledData,1,function(x){
-      length(unique(x))
-    })
-  })),2,min))==1){
-    message('None of the features vary across patients time points!')
-    return(NULL)
-  }
+  # if(max(apply(do.call(rbind,lapply(listOfSamples, function(X){
+  #   apply(X$scaledData,1,function(x){
+  #     length(unique(x))
+  #   })
+  # })),2,min))==1){
+  #   message('None of the features vary across patients time points!')
+  #   return(NULL)
+  # }
 
   # Checking if there are negative values
   if(min(trainData)<0){
