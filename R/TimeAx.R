@@ -12,9 +12,7 @@ calculateRatios = function(currData){
 
 ########## Building patient data
 #' @keywords internal
-dataCreation = function(trainData, sampleNames, constantValue = 0.5){
-  hasConstantValueTraj <- FALSE
-  
+dataCreation = function(trainData, sampleNames, constantValue = 0.5){  
   samples <- lapply(unique(sampleNames), function(currSample){
     selectedIndexes <- which(sampleNames == currSample)
     selectedTrajectoryBase <- 1:length(selectedIndexes)
